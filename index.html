@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="tr" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Ders Rehberi — Küçük adımlar, büyük keşifler</title>
+    <!-- Modern Arayüz Şablonu (Tailwind CSS) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Üst Bar: Günlük Seri (Streak) & Rozet Sayaçları -->
+    <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">📖</span>
+                <h1 class="text-lg font-bold text-indigo-400">Ders Rehberi</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Günlük Seri -->
+                <div class="flex items-center gap-1.5 bg-amber-950/60 text-amber-400 px-3 py-1.5 rounded-full font-bold text-xs border border-amber-800/50">
+                    🔥 <span id="streakCount">1</span> Gün Seri
+                </div>
+                <!-- Kazanılan Rozetler -->
+                <div class="flex items-center gap-1.5 bg-purple-950/60 text-purple-400 px-3 py-1.5 rounded-full font-bold text-xs border border-purple-800/50">
+                    🏆 <span id="badgeCount">0</span> Rozet
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Ana Çalışma Alanı -->
+    <main class="max-w-6xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
+
+        <!-- 1. Sınıf ve Ders Seçim Bölümü -->
+        <section class="bg-slate-800 rounded-2xl border border-slate-700 p-5 shadow-xl space-y-4">
+            <h2 class="text-xs font-bold tracking-wider text-indigo-400 uppercase">01. Sınıf ve Ders Seçimi</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">SINIF SEVİYESİ</label>
+                    <select id="gradeSelect" onchange="updateLessonContent()" class="w-full p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-200 font-medium outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        <option value="1">1. Sınıf</option>
+                        <option value="2">2. Sınıf</option>
+                        <option value="3">3. Sınıf</option>
+                        <option value="4">4. Sınıf</option>
+                        <option value="5">5. Sınıf</option>
+                        <option value="6" selected>6. Sınıf</option>
+                        <option value="7">7. Sınıf</option>
+                        <option value="8">8. Sınıf (LGS)</option>
+                        <option value="9">9. Sınıf</option>
+                        <option value="10">10. Sınıf</option>
+                        <option value="11">11. Sınıf</option>
+                        <option value="12">12. Sınıf (YKS)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">DERS</label>
+                    <select id="subjectSelect" onchange="updateLessonContent()" class="w-full p-3 rounded-xl border border-slate-700 bg-slate-900 text-slate-200 font-medium outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                        <option value="matematik">Matematik</option>
+                        <option value="fen">Fen Bilimleri</option>
+                        <option value="turkce">Türkçe</option>
+                        <option value="sosyal">Sosyal Bilgiler</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Detaylı Konu Anlatımı ve Özel Video Oynatıcı -->
+        <section class="bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl space-y-6">
+            <div class="border-b border-slate-700 pb-4">
+                <span class="text-xs font-bold tracking-wider text-indigo-400 uppercase" id="subjectBadge">MATEMATİK</span>
+                <h2 class="text-2xl font-bold text-white mt-1" id="topicTitle">Konu Yükleniyor...</h2>
+            </div>
+
+            <!-- Detaylı Yazılı Anlatım Alanı -->
+            <div id="writtenContent" class="text-slate-300 space-y-4 leading-relaxed text-sm sm:text-base">
+                <!-- JavaScript tarafında dinamik doldurulur -->
+            </div>
+
+            <!-- Özel Video Oynatıcı (Sadece Oynat/Durdur ve Tam Ekran) -->
+            <div class="space-y-3 pt-2">
+                <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                    📹 Konu Anlatım Videosu
+                </h3>
+                <div class="relative bg-black rounded-xl overflow-hidden shadow-2xl aspect-video flex items-center justify-center border border-slate-700 group">
+                    <video id="customVideo" class="w-full h-full object-cover">
+                        <source id="videoSource" src="" type="video/mp4">
+                        Tarayıcınız video etiketini desteklemiyor.
+                    </video>
+                    
+                    <!-- Minimalist Kontrol Paneli -->
+                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent p-4 flex items-center justify-between opacity-95 transition">
+                        <button id="playPauseBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2 rounded-lg font-bold text-xs transition shadow-md flex items-center gap-1.5">
+                            ▶ Oynat
+                        </button>
+                        <button id="fullscreenBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-4 py-2 rounded-lg font-bold text-xs transition border border-slate-600 shadow-md">
+                            ⛶ Tam Ekran
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Gerçek İnteraktif Test -->
+        <section class="bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                ✍️ Konu Kavrama Testi
+            </h2>
+            <div id="quizContainer" class="space-y-4">
+                <!-- Test sorusu ve seçenekleri dinamik yüklenir -->
+            </div>
+        </section>
+
+        <!-- 4. Rozet Sistemi -->
+        <section class="bg-slate-800 rounded-2xl border border-slate-700 p-6 shadow-xl space-y-4">
+            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                🏆 Başarı Rozetlerin
+            </h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div id="badge1" class="flex flex-col items-center p-4 rounded-xl border border-slate-700 bg-slate-900/50 opacity-40 transition text-center">
+                    <span class="text-3xl mb-1">🔥</span>
+                    <span class="font-bold text-xs text-slate-200">İlk Seri</span>
+                    <span class="text-[10px] text-slate-400">Giriş yap ve başlat</span>
+                </div>
+                <div id="badge2" class="flex flex-col items-center p-4 rounded-xl border border-slate-700 bg-slate-900/50 opacity-40 transition text-center">
+                    <span class="text-3xl mb-1">🎯</span>
+                    <span class="font-bold text-xs text-slate-200">Çözüm Ustası</span>
+                    <span class="text-[10px] text-slate-400">İlk testini çöz</span>
+                </div>
+                <div id="badge3" class="flex flex-col items-center p-4 rounded-xl border border-slate-700 bg-slate-900/50 opacity-40 transition text-center">
+                    <span class="text-3xl mb-1">📚</span>
+                    <span class="font-bold text-xs text-slate-200">Bilgi Kurdu</span>
+                    <span class="text-[10px] text-slate-400">3 farklı konu incele</span>
+                </div>
+                <div id="badge4" class="flex flex-col items-center p-4 rounded-xl border border-slate-700 bg-slate-900/50 opacity-40 transition text-center">
+                    <span class="text-3xl mb-1">⚡</span>
+                    <span class="font-bold text-xs text-slate-200">Şampiyon</span>
+                    <span class="text-[10px] text-slate-400">3 testi doğru yap</span>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-slate-500 text-xs border-t border-slate-800 mt-auto">
+        &copy; 2026 Ders Rehberi — Tüm Hakları Saklıdır.
+    </footer>
+
+    <!-- JavaScript Uygulama Mantığı -->
+    <script>
+        // --- ZENGİNLEŞTİRİLMİŞ İÇERİK VERİ TABANI ---
+        const CONTENT_DATABASE = {
+            matematik: {
+                title: "Kesirler, İşlemler ve Örnek Çözümler",
+                content: `
+                    <p class="font-medium">Bir bütünün eş parçalarından birini veya birkaçını gösteren sayılara <strong>kesir</strong> denir.</p>
+                    <div class="bg-indigo-950/40 p-4 rounded-xl border border-indigo-800/40 space-y-2">
+                        <p class="font-bold text-indigo-300">📌 Temel Kurallar ve İşlemler:</p>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-indigo-200">
+                            <li><strong>Pay:</strong> Üstteki sayıdır, kaç parçanın alındığını gösterir.</li>
+                            <li><strong>Payda:</strong> Alttaki sayıdır, bütünün kaç parçaya bölündüğünü gösterir.</li>
+                            <li><strong>Toplama / Çıkarma:</strong> İşlem yapabilmek için mutlaka paydalar eşitlenmelidir.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                        <p class="font-bold text-slate-200">💡 Örnek Soru & Çözümü:</p>
+                        <p class="text-sm mt-1 text-slate-300"><strong>Soru:</strong> 1/2 + 1/4 işleminin sonucu kaçtır?</p>
+                        <p class="text-sm text-emerald-400 mt-1"><strong>Çözüm:</strong> 1/2 kesri 2 ile genişletilerek 2/4 yapılır. Paylar toplanır: 2/4 + 1/4 = 3/4 bulunur.</p>
+                    </div>
+                `,
+                video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+                quiz: {
+                    question: "2/5 + 1/5 işleminin sonucu kaçtır?",
+                    options: ["3/10", "3/5", "2/10", "1/5"],
+                    correct: 1
+                }
+            },
+            fen: {
+                title: "Hücre ve Yapısal Organeller",
+                content: `
+                    <p class="font-medium">Canlıların canlılık özelliği gösteren en küçük yapı birimine <strong>hücre</strong> denir.</p>
+                    <div class="bg-emerald-950/40 p-4 rounded-xl border border-emerald-800/40 space-y-2">
+                        <p class="font-bold text-emerald-300">🔬 Önemli Hücre Organelleri:</p>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-emerald-200">
+                            <li><strong>Mitokondri:</strong> Hücre içi enerji üretimini gerçekleştirir.</li>
+                            <li><strong>Ribozom:</strong> Protein sentezinden sorumludur.</li>
+                            <li><strong>Kloroplast:</strong> Sadece bitki hücresinde bulunur ve fotosentez yapar.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                        <p class="font-bold text-slate-200">💡 Bilgi Notu:</p>
+                        <p class="text-sm mt-1 text-slate-300">Hayvan hücrelerinde kloroplast ve hücre duvarı bulunmaz.</p>
+                    </div>
+                `,
+                video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4",
+                quiz: {
+                    question: "Bitki hücresinde bulunup hayvan hücresinde bulunmayan ve fotosentez yapan organel hangisidir?",
+                    options: ["Mitokondri", "Ribozom", "Kloroplast", "Lizozom"],
+                    correct: 2
+                }
+            },
+            turkce: {
+                title: "Sözcükte Anlam Türleri",
+                content: `
+                    <p class="font-medium">Sözcükler cümle içerisindeki kullanımına göre gerçek, mecaz ve terim anlam kazanabilir.</p>
+                    <div class="bg-amber-950/40 p-4 rounded-xl border border-amber-800/40 space-y-2">
+                        <p class="font-bold text-amber-300">📖 Anlam Türleri:</p>
+                        <ul class="list-disc list-inside text-sm space-y-1 text-amber-200">
+                            <li><strong>Gerçek Anlam:</strong> Kelimenin akla gelen ilk temel anlamıdır.</li>
+                            <li><strong>Mecaz Anlam:</strong> Gerçek anlamından tamamen uzaklaşarak kazandığı soyut anlamdır.</li>
+                        </ul>
+                    </div>
+                `,
+                video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4",
+                quiz: {
+                    question: "'Söylediği ağır sözler kalbimi kırdı.' cümlesindeki 'kırdı' kelimesinin anlamı nedir?",
+                    options: ["Gerçek Anlam", "Mecaz Anlam", "Terim Anlam", "Yan Anlam"],
+                    correct: 1
+                }
+            },
+            sosyal: {
+                title: "Harita Bilgisi ve Ölçekler",
+                content: `
+                    <p class="font-medium">Dünya yüzeyinin tamamının veya bir kısmının kuşbakışı görünümünün ölçek kullanılarak düzleme aktarılmasına <strong>harita</strong> denir.</p>
+                `,
+                video: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4",
+                quiz: {
+                    question: "Bir çizimin harita özelliği taşıyabilmesi için en önemli kriter nedir?",
+                    options: ["Renkli olması", "Ölçek kullanılması", "Büyük çizilmesi", "Kroki olması"],
+                    correct: 1
+                }
+            }
+        };
+
+        let solvedTestCount = 0;
+        let viewedSubjects = new Set();
+
+        // Ders ve Konu İçeriğini Güncelleme
+        function updateLessonContent() {
+            const subject = document.getElementById('subjectSelect').value;
+            const data = CONTENT_DATABASE[subject] || CONTENT_DATABASE.matematik;
+
+            document.getElementById('subjectBadge').innerText = subject.toUpperCase();
+            document.getElementById('topicTitle').innerText = data.title;
+            document.getElementById('writtenContent').innerHTML = data.content;
+
+            const video = document.getElementById('customVideo');
+            document.getElementById('videoSource').src = data.video;
+            video.load();
+
+            renderQuiz(data.quiz);
+
+            viewedSubjects.add(subject);
+            if (viewedSubjects.size >= 3) {
+                unlockBadge('badge3');
+            }
+        }
+
+        // Test Alanını Hazırlama
+        function renderQuiz(quiz) {
+            const container = document.getElementById('quizContainer');
+            container.innerHTML = `
+                <div class="space-y-3 p-4 rounded-xl bg-slate-900 border border-slate-700">
+                    <p class="font-semibold text-slate-200">${quiz.question}</p>
+                    <div class="grid gap-2">
+                        ${quiz.options.map((opt, index) => `
+                            <button onclick="checkAnswer(${index},${quiz.correct})" class="text-left p-3 rounded-lg bg-slate-800 border border-slate-700 hover:border-indigo-500 transition font-medium text-sm text-slate-200">
+                                ${String.fromCharCode(65 + index)})${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                    <p id="quizFeedback" class="text-sm font-semibold hidden mt-2"></p>
+                </div>
+            `;
+        }
+
+        // Test Cevabını Kontrol Etme
+        function checkAnswer(selectedIndex, correctIndex) {
+            const feedback = document.getElementById('quizFeedback');
+            feedback.classList.remove('hidden');
+
+            if (selectedIndex === correctIndex) {
+                feedback.className = "text-sm font-semibold text-emerald-400 mt-2";
+                feedback.innerText = "🎉 Doğru cevap! Tebrikler.";
+                solvedTestCount++;
+                unlockBadge('badge2');
+                if (solvedTestCount >= 3) {
+                    unlockBadge('badge4');
+                }
+            } else {
+                feedback.className = "text-sm font-semibold text-rose-400 mt-2";
+                feedback.innerText = "❌ Yanlış cevap, konu anlatımını tekrar inceleyebilirsin.";
+            }
+        }
+
+        // Özel Video Oynatıcı Kontrolleri
+        const video = document.getElementById('customVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+        playPauseBtn.addEventListener('click', () => {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.innerText = '⏸ Durdur';
+            } else {
+                video.pause();
+                playPauseBtn.innerText = '▶ Oynat';
+            }
+        });
+
+        fullscreenBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                video.requestFullscreen().catch(err => alert("Tam ekran modu başlatılamadı."));
+            } else {
+                document.exitFullscreen();
+            }
+        });
+
+        // Günlük Seri (Streak) Mantığı
+        function handleStreak() {
+            let streak = parseInt(localStorage.getItem('userStreak')) || 1;
+            const lastLogin = localStorage.getItem('lastLoginDate');
+            const today = new Date().toDateString();
+
+            if (lastLogin !== today) {
+                localStorage.setItem('lastLoginDate', today);
+                localStorage.setItem('userStreak', streak);
+            }
+
+            document.getElementById('streakCount').innerText = streak;
+            unlockBadge('badge1');
+        }
+
+        // Rozet Kilit Açma
+        let unlockedBadgeCount = 0;
+        function unlockBadge(badgeId) {
+            const badge = document.getElementById(badgeId);
+            if (badge && badge.classList.contains('opacity-40')) {
+                badge.classList.remove('opacity-40', 'bg-slate-900/50');
+                badge.classList.add('bg-amber-950/40', 'border-amber-700/50', 'shadow-md');
+                unlockedBadgeCount++;
+                document.getElementById('badgeCount').innerText = unlockedBadgeCount;
+            }
+        }
+
+        // Sayfa Açılışı
+        window.onload = () => {
+            handleStreak();
+            updateLessonContent();
+        };
+    </script>
+</body>
+</html>
